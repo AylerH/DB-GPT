@@ -1,4 +1,4 @@
-import { apiInterceptors, getModelList, startModel, stopModel } from '@/client/api';
+import { apiInterceptors, getModelDetail, getModelList, startModel, stopModel, testModelConnection } from '@/client/api';
 import ModelForm from '@/components/model/model-form';
 import BlurredCard, { InnerDropdown } from '@/new-components/common/blurredCard';
 import ConstructLayout from '@/new-components/layout/Construct';
@@ -15,10 +15,63 @@ function Models() {
   const [models, setModels] = useState<Array<IModelData>>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [editingModel, setEditingModel] = useState<IModelData | null>(null);
+  const [editModelDetail, setEditModelDetail] = useState<any>(null);
 
   async function getModels() {
     const [, res] = await apiInterceptors(getModelList());
     setModels(res ?? []);
+  }
+
+  async function loadModelDetailAndEdit(info: IModelData) {
+    if (loading) return;
+    setLoading(true);
+    message.loading({ content: t('loading'), key: 'load_model' });
+
+    const [, res] = await apiInterceptors(getModelDetail(info.model_name, info.worker_type));
+    setLoading(false);
+    message.destroy('load_model');
+
+    if (res) {
+      setEditModelDetail(res);
+      setEditingModel(info);
+      setIsModalOpen(true);
+    } else {
+      // Fall back to basic info if detail not found
+      setEditModelDetail(null);
+      setEditingModel(info);
+      setIsModalOpen(true);
+    }
+  }
+
+  async function testTheModel(info: IModelData) {
+    if (loading) return;
+    setLoading(true);
+    message.loading({ content: t('testing_connection'), key: 'test_connection' });
+
+    // First try to get model detail to get the actual api_url
+    const [, modelDetail] = await apiInterceptors(getModelDetail(info.model_name, info.worker_type));
+    const apiUrl = modelDetail?.params?.api_url || modelDetail?.params?.api_base || `http://${info.host}:${info.port}`;
+
+    const [, , res] = await apiInterceptors(
+      testModelConnection({
+        host: info.host,
+        port: info.port,
+        model: info.model_name,
+        worker_type: info.worker_type,
+        params: {
+          api_url: apiUrl,
+          ...modelDetail?.params,
+        },
+      }),
+    );
+    setLoading(false);
+
+    if (res?.success) {
+      message.success({ content: t('connection_success'), key: 'test_connection' });
+    } else {
+      message.error({ content: res?.err_msg || t('connection_failed'), key: 'test_connection' });
+    }
   }
 
   async function startTheModel(info: IModelData) {
@@ -87,15 +140,6 @@ function Models() {
     getModels();
   }, []);
 
-  // TODO: unuesed function
-  // const onSearch = useDebounceFn(
-  //   async (e: any) => {
-  //     const v = e.target.value;
-  //     await modelSearch({ model_name: v });
-  //   },
-  //   { wait: 500 },
-  // ).run;
-
   const returnLogo = (name: string) => {
     return getModelIcon(name);
   };
@@ -105,15 +149,6 @@ function Models() {
       <div className='px-6 overflow-y-auto'>
         <div className='flex justify-between items-center mb-6'>
           <div className='flex items-center gap-4'>
-            {/* <Input
-              variant="filled"
-              prefix={<SearchOutlined />}
-              placeholder={t('please_enter_the_keywords')}
-              onChange={onSearch}
-              onPressEnter={onSearch}
-              allowClear
-              className="w-[230px] h-[40px] border-1 border-white backdrop-filter backdrop-blur-lg bg-white bg-opacity-30 dark:border-[#6f7f95] dark:bg-[#6f7f95] dark:bg-opacity-60"
-            /> */}
           </div>
 
           <div className='flex items-center gap-4'>
@@ -121,6 +156,7 @@ function Models() {
               className='border-none text-white bg-button-gradient'
               icon={<PlusOutlined />}
               onClick={() => {
+                setEditingModel(null);
                 setIsModalOpen(true);
               }}
             >
@@ -158,28 +194,29 @@ function Models() {
                   menu={{
                     items: [
                       {
+                        key: 'test_model',
+                        label: <span className='text-blue-400'>{t('test_connection')}</span>,
+                        onClick: () => testTheModel(item),
+                      },
+                      {
+                        key: 'edit_model',
+                        label: <span className='text-yellow-500'>{t('edit_model')}</span>,
+                        onClick: () => loadModelDetailAndEdit(item),
+                      },
+                      {
                         key: 'stop_model',
-                        label: (
-                          <span className='text-red-400' onClick={() => stopTheModel(item)}>
-                            {t('stop_model')}
-                          </span>
-                        ),
+                        label: <span className='text-red-400'>{t('stop_model')}</span>,
+                        onClick: () => stopTheModel(item),
                       },
                       {
                         key: 'start_model',
-                        label: (
-                          <span className='text-green-400' onClick={() => startTheModel(item)}>
-                            {t('start_model')}
-                          </span>
-                        ),
+                        label: <span className='text-green-400'>{t('start_model')}</span>,
+                        onClick: () => startTheModel(item),
                       },
                       {
                         key: 'stop_and_delete_model',
-                        label: (
-                          <span className='text-red-400' onClick={() => stopTheModel(item, true)}>
-                            {t('stop_and_delete_model')}
-                          </span>
-                        ),
+                        label: <span className='text-red-400'>{t('stop_and_delete_model')}</span>,
+                        onClick: () => stopTheModel(item, true),
                       },
                     ],
                   }}
@@ -198,20 +235,26 @@ function Models() {
         <Modal
           width={800}
           open={isModalOpen}
-          title={t('create_model')}
+          title={editingModel ? t('edit_model') : t('create_model')}
           onCancel={() => {
             setIsModalOpen(false);
+            setEditingModel(null);
           }}
           footer={null}
         >
           <ModelForm
             onCancel={() => {
               setIsModalOpen(false);
+              setEditingModel(null);
+              setEditModelDetail(null);
             }}
             onSuccess={() => {
               setIsModalOpen(false);
+              setEditingModel(null);
+              setEditModelDetail(null);
               getModels();
             }}
+            initialData={editModelDetail}
           />
         </Modal>
       </div>
@@ -220,3 +263,4 @@ function Models() {
 }
 
 export default Models;
+

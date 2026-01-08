@@ -42,9 +42,8 @@ type RouteItem = {
 // }
 
 function smallMenuItemStyle(active?: boolean) {
-  return `flex items-center justify-center mx-auto rounded w-14 h-14 text-xl hover:bg-[#F1F5F9] dark:hover:bg-theme-dark transition-colors cursor-pointer ${
-    active ? 'bg-[#F1F5F9] dark:bg-theme-dark' : ''
-  }`;
+  return `flex items-center justify-center mx-auto rounded w-14 h-14 text-xl hover:bg-[#F1F5F9] dark:hover:bg-theme-dark transition-colors cursor-pointer ${active ? 'bg-[#F1F5F9] dark:bg-theme-dark' : ''
+    }`;
 }
 
 function SideBar() {
@@ -431,9 +430,9 @@ function SideBar() {
     return (
       <div
         className='flex flex-col justify-between pt-4 h-screen bg-bar dark:bg-[#232734] animate-fade animate-duration-300'
-        // onMouseEnter={() => {
-        // setIsMenuExpand(true);
-        // }}
+      // onMouseEnter={() => {
+      // setIsMenuExpand(true);
+      // }}
       >
         <div>
           <Link href='/' className='flex justify-center items-center pb-4'>
@@ -466,9 +465,9 @@ function SideBar() {
   return (
     <div
       className='flex flex-col justify-between h-screen px-4 pt-4 bg-bar dark:bg-[#232734] animate-fade animate-duration-300'
-      // onMouseLeave={() => {
-      //   setIsMenuExpand(false);
-      // }}
+    // onMouseLeave={() => {
+    //   setIsMenuExpand(false);
+    // }}
     >
       <div>
         {/* LOGO */}

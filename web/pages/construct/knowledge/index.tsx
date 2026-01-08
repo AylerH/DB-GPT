@@ -1,5 +1,5 @@
 import { ChatContext } from '@/app/chat-context';
-import { apiInterceptors, delSpace, getSpaceConfig, getSpaceList, newDialogue } from '@/client/api';
+import { addSpace, apiInterceptors, delSpace, getSpaceConfig, getSpaceList, newDialogue, uploadDocument } from '@/client/api';
 import DocPanel from '@/components/knowledge/doc-panel';
 import DocTypeForm from '@/components/knowledge/doc-type-form';
 import DocUploadForm from '@/components/knowledge/doc-upload-form';
@@ -22,6 +22,7 @@ const Knowledge = () => {
   const [spaceList, setSpaceList] = useState<Array<ISpace> | null>([]);
   const [isAddShow, setIsAddShow] = useState<boolean>(false);
   const [isPanelShow, setIsPanelShow] = useState<boolean>(false);
+  const [importLoading, setImportLoading] = useState<boolean>(false);
   const [currentSpace, setCurrentSpace] = useState<ISpace>();
 
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -125,6 +126,96 @@ const Knowledge = () => {
     getSpaces({ name: e.target.value });
   };
 
+  const handleFolderImport = async (e: any) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setImportLoading(true);
+    const folderMap = new Map<string, File[]>();
+
+    // Group files by top-level folder
+    for (const file of files) {
+      const pathParts = file.webkitRelativePath.split('/');
+      // If file is in a subfolder, use the top-level folder name as space name
+      // If file is at root of selection, maybe skip or use a default space?
+      // Assuming selection is a root folder containing subfolders -> KBs
+      // Or selection IS the KB folder.
+      
+      // Let's assume: User selects "Data".
+      // Data/Finance/report.pdf -> Space "Finance"
+      // Data/HR/policy.pdf -> Space "HR"
+      // Data/note.txt -> Space "Data" (root)
+      
+      let spaceName = pathParts.length > 1 ? pathParts[0] : 'Default';
+      // If user selected "Finance" folder directly: "Finance/report.pdf" -> pathParts[0] is "Finance"
+      
+      // Better strategy: Use the immediate parent folder of the file as KB name?
+      // But standard is usually Root Folder -> KB Name.
+      // If I select "MyKBs", and it has "KB1", "KB2".
+      // webkitRelativePath: MyKBs/KB1/file.txt.
+      // Then Space Name = KB1.
+      
+      // If I select "KB1" directly.
+      // webkitRelativePath: KB1/file.txt.
+      // Then Space Name = KB1.
+      
+      // So taking pathParts[0] seems robust enough for "Folder = KB".
+      
+      if (pathParts.length > 0) {
+        spaceName = pathParts[0];
+      }
+      
+      if (!folderMap.has(spaceName)) {
+        folderMap.set(spaceName, []);
+      }
+      folderMap.get(spaceName)?.push(file);
+    }
+
+    try {
+      for (const [name, spaceFiles] of folderMap) {
+         // Create Space
+         // Check if space exists first? addSpace might error if exists OR we just catch it.
+         // But we assume we want to create if not exists.
+         // addSpace API doesn't have "create_if_not_exists" flag? 
+         // Let's try to create. 
+         try {
+             await apiInterceptors(addSpace({
+                 name: name,
+                 vector_type: 'Chroma', // Default
+                 domain_type: 'Normal', // Default
+                 desc: `Imported from folder ${name}`,
+                 owner: 'dbgpt'
+             }));
+         } catch (err) {
+             console.log(`Space ${name} might already exist or error:`, err);
+             // Verify existence or just proceed to upload
+         }
+         
+         // Upload files
+         for (const file of spaceFiles) {
+            const formData = new FormData();
+            formData.append('doc_name', file.name);
+            formData.append('doc_file', file);
+            formData.append('doc_type', 'DOCUMENT');
+            try {
+                await apiInterceptors(uploadDocument(name, formData));
+            } catch (err) {
+                console.error(`Failed to upload ${file.name} to ${name}`, err);
+            }
+         }
+      }
+      message.success(t('Import_Success'));
+      getSpaces();
+    } catch (error) {
+      console.error(error);
+      message.error(t('Import_Failed'));
+    } finally {
+      setImportLoading(false);
+      // Clear input value to allow re-selecting same folder
+      e.target.value = '';
+    }
+  };
+
   return (
     <ConstructLayout>
       <Spin spinning={loading}>
@@ -152,6 +243,20 @@ const Knowledge = () => {
             </div>
 
             <div className='flex items-center gap-4'>
+              <Button
+                loading={importLoading}
+                className='border-none text-white bg-button-gradient'
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.webkitdirectory = true;
+                  input.multiple = true;
+                  input.onchange = handleFolderImport;
+                  input.click();
+                }}
+              >
+                {t('Import_from_Folder')}
+              </Button>
               <Button
                 className='border-none text-white bg-button-gradient'
                 icon={<PlusOutlined />}

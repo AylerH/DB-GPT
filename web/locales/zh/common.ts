@@ -438,4 +438,13 @@ export const CommonZh: Resources['translation'] = {
   please_input_api_timeout: '请输入API超时时间',
   timeout_range_validation: '超时时间必须在1-2000秒之间',
   api_timeout_placeholder: '请输入超时时间，例如：300',
+  Import_from_Folder: '从文件夹导入',
+  Import_Success: '导入成功',
+  Import_Failed: '导入失败',
+  test_connection: '测试连接',
+  testing_connection: '正在测试连接...',
+  connection_success: '连接成功',
+  connection_failed: '连接失败',
+  edit_model: '编辑模型',
+  loading: '加载中...',
 } as const;

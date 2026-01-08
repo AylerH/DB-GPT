@@ -1,5 +1,8 @@
 # 启动
 ## 配置
+### openai兼容模式的toml配置文件中配置；
+configs/dbgpt-proxy-openai.toml中配置
+
 ### .env中配置
 .env中（openai兼容模式）：
 ```
@@ -13,12 +16,27 @@ LLM_MODEL_NAME=free:Qwen3-30B-A3B
 SILICONFLOW_API_KEY
 AIMLAPI_API_KEY
 ```
+### 页面中配置模型
+创建模型：
+![1](images/1.jpg)
 
 ## docker启动
 ```
 docker compose down
 docker compose up -d
 ```
+
+# 平台使用
+## 知识库
+### .env配置嵌入模型-默认使用ollam的bge-m3
+```
+EMBEDDING_API_KEY=
+EMBEDDING_API_BASE=http://127.0.0.1:11434
+EMBEDDING_MODEL_NAME=bge-m3:latest
+```
+### 创建
+![2](images/2.jpg)
+
 # <img src="./assets/LOGO_SMALL.png" alt="Logo" style="vertical-align: middle; height: 24px;" /> DB-GPT: AI Native Data App Development framework with AWEL and Agents
 
 <p align="left">

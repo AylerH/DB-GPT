@@ -1,4 +1,4 @@
-import { apiInterceptors, createModel, getSupportModels } from '@/client/api';
+import { apiInterceptors, createModel, getSupportModels, testModelConnection } from '@/client/api';
 import { renderModelIcon } from '@/components/chat/header/model-selector';
 import { ConfigurableParams } from '@/types/common';
 import { StartModelParams, SupportModel } from '@/types/model';
@@ -14,7 +14,19 @@ const FormItem = Form.Item;
 // The supported worker types
 const WORKER_TYPES = ['llm', 'text2vec', 'reranker'];
 
-function ModelForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: () => void }) {
+interface ModelFormProps {
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialData?: {
+    host: string;
+    port: number;
+    model: string;
+    worker_type: string;
+    params: any;
+  } | null;
+}
+
+function ModelForm({ onCancel, onSuccess, initialData }: ModelFormProps) {
   const { t } = useTranslation();
   const [_, setModels] = useState<Array<SupportModel> | null>([]);
   const [selectedWorkerType, setSelectedWorkerType] = useState<string>();
@@ -47,6 +59,21 @@ function ModelForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: (
       setGroupedModels(grouped);
       // Note: Initially do not set providers, wait for worker_type selection before setting
       setProviders([]);
+
+      // If initialData is provided, pre-fill the form
+      if (initialData) {
+        setSelectedWorkerType(initialData.worker_type);
+        // Find the provider for this model
+        const modelProvider = initialData.params?.provider;
+        if (modelProvider) {
+          setSelectedProvider(modelProvider);
+        }
+        // Set form values
+        form.setFieldsValue({
+          name: initialData.model,
+          ...initialData.params,
+        });
+      }
     }
   }
 
@@ -85,6 +112,58 @@ function ModelForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: (
       if (firstModel?.params) {
         setParams(Array.isArray(firstModel.params) ? firstModel.params : [firstModel.params]);
       }
+    }
+  }
+
+  async function onTestConnection() {
+    if (!selectedProvider || !selectedWorkerType) return;
+    const values = form.getFieldsValue();
+    const processFormValues = (formValues: any) => {
+      const processed = { ...formValues };
+      params?.forEach(param => {
+        if (param.nested_fields && processed[param.param_name]) {
+          const nestedValue = processed[param.param_name];
+          if (nestedValue.type) {
+            const typeFields = param.nested_fields[nestedValue.type] || [];
+            const fieldValues = {};
+            typeFields.forEach(field => {
+              if (nestedValue[field.param_name] !== undefined) {
+                fieldValues[field.param_name] = nestedValue[field.param_name];
+              }
+            });
+            processed[param.param_name] = {
+              ...fieldValues,
+              type: nestedValue.type,
+            };
+          }
+        }
+      });
+      return processed;
+    };
+
+    setLoading(true);
+    try {
+      const processedValues = processFormValues(values);
+      const selectedModel = groupedModels[selectedProvider]?.find(m => m.model === processedValues.name);
+
+      const params: StartModelParams = {
+        host: selectedModel?.host || '',
+        port: selectedModel?.port || 0,
+        model: processedValues.name,
+        worker_type: selectedWorkerType,
+        params: processedValues,
+      };
+
+      const [, , data] = await apiInterceptors(testModelConnection(params));
+      if (data?.success) {
+        message.success(t('Connection Success'));
+      } else {
+        message.error(data?.err_msg || t('Connection Failed'));
+      }
+    } catch (_error) {
+      message.error(t('Connection Failed'));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -221,6 +300,9 @@ function ModelForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: (
       )}
 
       <div className='flex justify-center space-x-4'>
+        <Button onClick={onTestConnection} loading={loading}>
+          {t('verify')}
+        </Button>
         <Button type='primary' htmlType='submit' loading={loading}>
           {t('submit')}
         </Button>

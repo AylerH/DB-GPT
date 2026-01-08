@@ -435,4 +435,13 @@ export const CommonEn = {
   please_input_api_timeout: 'Please input API timeout',
   timeout_range_validation: 'Timeout must be between 1-2000 seconds',
   api_timeout_placeholder: 'Please enter timeout, e.g.: 300',
+  Import_from_Folder: 'Import from Folder',
+  Import_Success: 'Import Success',
+  Import_Failed: 'Import Failed',
+  test_connection: 'Test Connection',
+  testing_connection: 'Testing connection...',
+  connection_success: 'Connection successful',
+  connection_failed: 'Connection failed',
+  edit_model: 'Edit Model',
+  loading: 'Loading...',
 } as const;

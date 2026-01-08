@@ -263,6 +263,16 @@ export const startModel = (data: BaseModelParams) => {
   return POST<BaseModelParams, boolean>('/api/v2/serve/model/models/start', data);
 };
 
+export const testModelConnection = (data: StartModelParams) => {
+  return POST<StartModelParams, boolean>('/api/v2/serve/model/models/test', data);
+};
+
+export const getModelDetail = (modelName: string, workerType: string) => {
+  return GET<null, { host: string; port: number; model: string; worker_type: string; params: any }>(
+    `/api/v2/serve/model/models/${encodeURIComponent(modelName)}?worker_type=${workerType}`,
+  );
+};
+
 export const getSupportModels = () => {
   return GET<null, Array<SupportModel>>('/api/v2/serve/model/model-types');
 };

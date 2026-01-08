@@ -39,7 +39,9 @@ api_key = "${env:OPENAI_API_KEY}"
 # Embedding Configuration
 [[models.embeddings]]
 name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
-provider = "proxy/openai"
-# Some providers might need a full URL for embeddings, or use the base + /embeddings
-api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
-api_key = "${env:OPENAI_API_KEY}"
+# Provider can be set via EMBEDDING_PROVIDER env var (e.g. proxy/ollama for Ollama)
+provider = "${env:EMBEDDING_PROVIDER:-proxy/openai}"
+# api_base for OpenAI compatible, api_url for Ollama
+api_base = "${env:EMBEDDING_API_BASE:-https://api.openai.com/v1}"
+api_url = "${env:OLLAMA_API_BASE:-http://localhost:11434}"
+api_key = "${env:EMBEDDING_API_KEY}"
