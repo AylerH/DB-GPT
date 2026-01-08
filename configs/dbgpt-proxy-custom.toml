@@ -1,0 +1,45 @@
+[system]
+# Load language from environment variable
+language = "${env:DBGPT_LANG:-zh}"
+api_keys = []
+encrypt_key = "your_secret_key"
+
+# Server Configurations
+[service.web]
+host = "0.0.0.0"
+port = 5670
+
+[service.web.database]
+type = "mysql"
+host = "${env:MYSQL_HOST:-127.0.0.1}"
+port = "${env:MYSQL_PORT:-3306}"
+database = "${env:MYSQL_DATABASE:-dbgpt}"
+user = "${env:MYSQL_USER:-root}"
+password ="${env:MYSQL_PASSWORD:-aa123456}"
+
+[service.model.worker]
+host = "127.0.0.1"
+
+[rag.storage]
+[rag.storage.vector]
+type = "chroma"
+persist_path = "pilot/data"
+
+# Model Configurations for Generic OpenAI Compatible API
+[models]
+
+# LLM Configuration
+[[models.llms]]
+name = "${env:LLM_MODEL_NAME:-gpt-3.5-turbo}"
+provider = "proxy/openai"
+# The base URL of your OpenAI compatible service (e.g. https://api.deepseek.com/v1)
+api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
+api_key = "${env:OPENAI_API_KEY}"
+
+# Embedding Configuration
+[[models.embeddings]]
+name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
+provider = "proxy/openai"
+# Some providers might need a full URL for embeddings, or use the base + /embeddings
+api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
+api_key = "${env:OPENAI_API_KEY}"

@@ -25,9 +25,11 @@ services:
       start_period: 60s
   webserver:
     image: eosphorosai/dbgpt-openai:latest
-    command: dbgpt start webserver --config /app/configs/dbgpt-proxy-siliconflow-mysql.toml
+    command: dbgpt start webserver --config /app/configs/dbgpt-proxy-custom.toml
     environment:
-      - SILICONFLOW_API_KEY=${SILICONFLOW_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME}
       - MYSQL_PASSWORD=aa123456
       - MYSQL_HOST=db
       - MYSQL_PORT=3306

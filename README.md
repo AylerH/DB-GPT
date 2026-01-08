@@ -1,3 +1,24 @@
+# 启动
+## 配置
+### .env中配置
+.env中（openai兼容模式）：
+```
+OPENAI_API_KEY=sk-
+OPENAI_API_BASE=https://api.suanli.cn/v1
+LLM_MODEL_NAME=free:Qwen3-30B-A3B
+```
+
+默认仅支持：
+```
+SILICONFLOW_API_KEY
+AIMLAPI_API_KEY
+```
+
+## docker启动
+```
+docker compose down
+docker compose up -d
+```
 # <img src="./assets/LOGO_SMALL.png" alt="Logo" style="vertical-align: middle; height: 24px;" /> DB-GPT: AI Native Data App Development framework with AWEL and Agents
 
 <p align="left">
