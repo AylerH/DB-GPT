@@ -6,11 +6,11 @@ configs/dbgpt-proxy-openai.toml中配置
 ### .env中配置
 #### 全部环境变量配置
 见configs\ENV_VARIABLES环境变量配置说明.md
-#### .env中（openai兼容模式）：
+#### 配置对话模型（模型管理显示）
 ```
-OPENAI_API_KEY=sk-
-OPENAI_API_BASE=https://api.suanli.cn/v1
-LLM_MODEL_NAME=free:Qwen3-30B-A3B
+PROXY_CUSTOM_API_BASE=https://api.suanli.cn/v1
+PROXY_CUSTOM_LLM_MODEL_NAME=free:Qwen3-30B-A3B
+PROXY_CUSTOM_API_KEY=sk-
 ```
 
 默认仅支持：
@@ -30,11 +30,11 @@ docker compose up -d
 
 # 平台使用
 ## 知识库
-### .env配置嵌入模型-默认使用ollam的bge-m3
+### .env配置嵌入模型-默认使用本地ollam的bge-m3
 ```
-EMBEDDING_API_KEY=
-EMBEDDING_API_BASE=http://127.0.0.1:11434
-EMBEDDING_MODEL_NAME=bge-m3:latest
+PROXY_CUSTOM_EMBEDDING_API_BASE=http://host.docker.internal:11434
+PROXY_CUSTOM_EMBEDDING_PROVIDER=proxy/ollama
+PROXY_CUSTOM_EMBEDDING_MODEL_NAME=bge-m3:latest
 ```
 ### 创建
 ![2](images/2.jpg)

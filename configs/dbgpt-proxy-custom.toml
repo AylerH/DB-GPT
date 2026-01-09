@@ -39,9 +39,10 @@ api_key = "${env:PROXY_CUSTOM_API_KEY:-}"
 # Embedding Configuration
 [[models.embeddings]]
 name = "${env:PROXY_CUSTOM_EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
-# Provider can be set via EMBEDDING_PROVIDER env var (e.g. proxy/ollama for Ollama)
+# Provider: proxy/openai for OpenAI compatible, proxy/ollama for Ollama
 provider = "${env:PROXY_CUSTOM_EMBEDDING_PROVIDER:-proxy/openai}"
-# api_base for OpenAI compatible, api_url for Ollama
+# api_base for OpenAI compatible APIs
 api_base = "${env:PROXY_CUSTOM_EMBEDDING_API_BASE:-https://api.openai.com/v1}"
-api_url = "${env:PROXY_CUSTOM_OLLAMA_API_BASE:-http://localhost:11434}"
+# api_url for Ollama (uses same env var for simplicity)
+api_url = "${env:PROXY_CUSTOM_EMBEDDING_API_BASE:-http://localhost:11434}"
 api_key = "${env:PROXY_CUSTOM_EMBEDDING_API_KEY:-}"

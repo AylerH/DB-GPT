@@ -50,26 +50,20 @@ services:
       retries: 5
   webserver:
     image: eosphorosai/dbgpt-openai:latest
-    command: dbgpt start webserver --config /app/configs/dbgpt-proxy-custom.toml
+    command: dbgpt start webserver --config ${DBGPT_CONFIG:-/app/configs/dbgpt-proxy-custom.toml}
+    env_file:
+      - .env
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_API_BASE=${OPENAI_API_BASE}
-      - LLM_MODEL=${LLM_MODEL:-}
-      - LLM_MODEL_NAME=${LLM_MODEL_NAME}
-      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY:-}
-      - EMBEDDING_API_BASE=${EMBEDDING_API_BASE:-}
-      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-}
-      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-}
-      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://localhost:11434}
-      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-elasticsearch}
-      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT:-9200}
-      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
-      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-dbgpt}
-      - MYSQL_PASSWORD=aa123456
+      # Docker 内部服务地址覆盖（必须使用服务名而非 localhost）
       - MYSQL_HOST=db
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=dbgpt
       - MYSQL_USER=root
+      - MYSQL_PASSWORD=aa123456
+      - ELASTICSEARCH_URL=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-dbgpt}
     volumes:
       - ./configs:/app/configs
       - ./data:/data

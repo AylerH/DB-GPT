@@ -307,23 +307,29 @@ async def model_test(
         model = request.model
         
         # Fallback to environment variables for .env configured models
-        if not api_base:
+        # Also detect if api_base points to DB-GPT server itself (port 5670) - this is wrong
+        is_self_reference = api_base and ":5670" in str(api_base)
+        if not api_base or is_self_reference:
+            if is_self_reference:
+                logger.warning(f"api_base={api_base} appears to point to DB-GPT server itself, falling back to env vars")
             if worker_type == WorkerType.TEXT2VEC:
                 # Check embedding-related env vars
-                api_base = os.getenv("EMBEDDING_API_BASE") or os.getenv("EMBEDDING_OPENAI_API_BASE")
+                api_base = os.getenv("EMBEDDING_API_BASE") or os.getenv("EMBEDDING_OPENAI_API_BASE") or os.getenv("PROXY_CUSTOM_EMBEDDING_API_BASE")
             else:
                 # Check LLM-related env vars
-                api_base = os.getenv("LLM_API_BASE") or os.getenv("OPENAI_API_BASE")
+                api_base = os.getenv("LLM_API_BASE") or os.getenv("OPENAI_API_BASE") or os.getenv("PROXY_CUSTOM_API_BASE")
         
         # Also fallback api_key from environment variables
         if not api_key:
             if worker_type == WorkerType.TEXT2VEC:
-                api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("EMBEDDING_OPENAI_API_KEY")
+                api_key = os.getenv("EMBEDDING_API_KEY") or os.getenv("EMBEDDING_OPENAI_API_KEY") or os.getenv("PROXY_CUSTOM_EMBEDDING_API_KEY")
             else:
-                api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
+                api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("PROXY_CUSTOM_API_KEY")
         
         if not api_base:
              return Result.failed(msg="API Base URL is required for testing. Please provide api_url in the form or set environment variables.")
+
+        logger.info(f"Test Connection Debug: api_base={api_base}, worker_type={worker_type}, is_ollama={'11434' in str(api_base) or 'ollama' in str(api_base).lower()}")
 
         headers = {
             "Content-Type": "application/json"
@@ -384,7 +390,9 @@ async def model_test(
                         "max_tokens": 5
                      }
                  try:
+                     logger.info(f"Test Connection Debug: LLM Requesting URL: {url}")
                      response = await client.post(url, json=payload, headers=headers, timeout=60)
+                     logger.info(f"Test Connection Debug: Response: {response.status_code} {response.text}")
                  except httpx.TimeoutException:
                      return Result.failed(msg=f"Connection timed out after 60s connecting to {url}")
                  except Exception as err:
