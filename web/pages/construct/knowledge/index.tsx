@@ -1,5 +1,5 @@
 import { ChatContext } from '@/app/chat-context';
-import { addSpace, apiInterceptors, delSpace, getSpaceConfig, getSpaceList, newDialogue, uploadDocument } from '@/client/api';
+import { addSpace, apiInterceptors, delSpace, getSpaceConfig, getSpaceList, newDialogue, updateSpace, uploadDocument } from '@/client/api';
 import DocPanel from '@/components/knowledge/doc-panel';
 import DocTypeForm from '@/components/knowledge/doc-type-form';
 import DocUploadForm from '@/components/knowledge/doc-upload-form';
@@ -8,8 +8,8 @@ import SpaceForm from '@/components/knowledge/space-form';
 import BlurredCard, { ChatButton, InnerDropdown } from '@/new-components/common/blurredCard';
 import ConstructLayout from '@/new-components/layout/Construct';
 import { File, ISpace, IStorage, StepChangeParams } from '@/types/knowledge';
-import { PlusOutlined, ReadOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
-import { Button, Input, Modal, Spin, Steps, Tag } from 'antd';
+import { EditOutlined, PlusOutlined, ReadOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
+import { Button, Form, Input, message, Modal, Spin, Steps, Tag } from 'antd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 import moment from 'moment';
@@ -32,6 +32,11 @@ const Knowledge = () => {
   const [addStatus, setAddStatus] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [spaceConfig, setSpaceConfig] = useState<IStorage | null>(null);
+
+  // Edit space state
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [editingSpace, setEditingSpace] = useState<ISpace | null>(null);
+  const [editForm] = Form.useForm();
 
   const { t } = useTranslation();
   const addKnowledgeSteps = [
@@ -126,6 +131,38 @@ const Knowledge = () => {
     getSpaces({ name: e.target.value });
   };
 
+  // Handle edit space
+  const handleEditSpace = (space: ISpace) => {
+    setEditingSpace(space);
+    editForm.setFieldsValue({
+      name: space.name,
+      desc: space.desc,
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      const values = await editForm.validateFields();
+      const [, , res] = await apiInterceptors(
+        updateSpace({
+          id: editingSpace?.id || '',
+          name: values.name,
+          desc: values.desc,
+        })
+      );
+      if (res?.success) {
+        message.success(t('update_success') || 'Update successful');
+        setEditModalOpen(false);
+        getSpaces();
+      } else {
+        message.error(res?.err_msg || t('update_failed') || 'Update failed');
+      }
+    } catch (error) {
+      console.error('Update space error:', error);
+    }
+  };
+
   const handleFolderImport = async (e: any) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -140,31 +177,31 @@ const Knowledge = () => {
       // If file is at root of selection, maybe skip or use a default space?
       // Assuming selection is a root folder containing subfolders -> KBs
       // Or selection IS the KB folder.
-      
+
       // Let's assume: User selects "Data".
       // Data/Finance/report.pdf -> Space "Finance"
       // Data/HR/policy.pdf -> Space "HR"
       // Data/note.txt -> Space "Data" (root)
-      
+
       let spaceName = pathParts.length > 1 ? pathParts[0] : 'Default';
       // If user selected "Finance" folder directly: "Finance/report.pdf" -> pathParts[0] is "Finance"
-      
+
       // Better strategy: Use the immediate parent folder of the file as KB name?
       // But standard is usually Root Folder -> KB Name.
       // If I select "MyKBs", and it has "KB1", "KB2".
       // webkitRelativePath: MyKBs/KB1/file.txt.
       // Then Space Name = KB1.
-      
+
       // If I select "KB1" directly.
       // webkitRelativePath: KB1/file.txt.
       // Then Space Name = KB1.
-      
+
       // So taking pathParts[0] seems robust enough for "Folder = KB".
-      
+
       if (pathParts.length > 0) {
         spaceName = pathParts[0];
       }
-      
+
       if (!folderMap.has(spaceName)) {
         folderMap.set(spaceName, []);
       }
@@ -173,36 +210,36 @@ const Knowledge = () => {
 
     try {
       for (const [name, spaceFiles] of folderMap) {
-         // Create Space
-         // Check if space exists first? addSpace might error if exists OR we just catch it.
-         // But we assume we want to create if not exists.
-         // addSpace API doesn't have "create_if_not_exists" flag? 
-         // Let's try to create. 
-         try {
-             await apiInterceptors(addSpace({
-                 name: name,
-                 vector_type: 'Chroma', // Default
-                 domain_type: 'Normal', // Default
-                 desc: `Imported from folder ${name}`,
-                 owner: 'dbgpt'
-             }));
-         } catch (err) {
-             console.log(`Space ${name} might already exist or error:`, err);
-             // Verify existence or just proceed to upload
-         }
-         
-         // Upload files
-         for (const file of spaceFiles) {
-            const formData = new FormData();
-            formData.append('doc_name', file.name);
-            formData.append('doc_file', file);
-            formData.append('doc_type', 'DOCUMENT');
-            try {
-                await apiInterceptors(uploadDocument(name, formData));
-            } catch (err) {
-                console.error(`Failed to upload ${file.name} to ${name}`, err);
-            }
-         }
+        // Create Space
+        // Check if space exists first? addSpace might error if exists OR we just catch it.
+        // But we assume we want to create if not exists.
+        // addSpace API doesn't have "create_if_not_exists" flag? 
+        // Let's try to create. 
+        try {
+          await apiInterceptors(addSpace({
+            name: name,
+            vector_type: 'Chroma', // Default
+            domain_type: 'Normal', // Default
+            desc: `Imported from folder ${name}`,
+            owner: 'dbgpt'
+          }));
+        } catch (err) {
+          console.log(`Space ${name} might already exist or error:`, err);
+          // Verify existence or just proceed to upload
+        }
+
+        // Upload files
+        for (const file of spaceFiles) {
+          const formData = new FormData();
+          formData.append('doc_name', file.name);
+          formData.append('doc_file', file);
+          formData.append('doc_type', 'DOCUMENT');
+          try {
+            await apiInterceptors(uploadDocument(name, formData));
+          } catch (err) {
+            console.error(`Failed to upload ${file.name} to ${name}`, err);
+          }
+        }
       }
       message.success(t('Import_Success'));
       getSpaces();
@@ -292,6 +329,15 @@ const Knowledge = () => {
                   <InnerDropdown
                     menu={{
                       items: [
+                        {
+                          key: 'edit',
+                          label: (
+                            <span onClick={(e) => { e.stopPropagation(); handleEditSpace(space); }}>
+                              <EditOutlined className='mr-1' />
+                              {t('Edit')}
+                            </span>
+                          ),
+                        },
                         {
                           key: 'del',
                           label: (
@@ -384,6 +430,49 @@ const Knowledge = () => {
               handleStepChange={handleStepChange}
             />
           )}
+        </Modal>
+
+        {/* Edit Space Modal */}
+        <Modal
+          title={t('Knowledge_Space') + ' - ' + t('Edit')}
+          open={editModalOpen}
+          onOk={handleEditSubmit}
+          onCancel={() => setEditModalOpen(false)}
+          destroyOnClose
+        >
+          <Form
+            form={editForm}
+            layout="vertical"
+            className="mt-4"
+          >
+            <Form.Item
+              label={t('Knowledge_Space_Name')}
+              name="name"
+              rules={[
+                { required: true, message: t('Please_input_the_name') },
+                () => ({
+                  validator(_, value) {
+                    if (/[^\u4e00-\u9fa50-9a-zA-Z_-]/.test(value)) {
+                      return Promise.reject(new Error(t('the_name_can_only_contain')));
+                    }
+                    return Promise.resolve();
+                  },
+                }),
+              ]}
+            >
+              <Input placeholder={t('Please_input_the_name')} />
+            </Form.Item>
+            <Form.Item
+              label={t('Description')}
+              name="desc"
+              rules={[{ required: true, message: t('Please_input_the_description') }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder={t('Please_input_the_description')}
+              />
+            </Form.Item>
+          </Form>
         </Modal>
       </Spin>
     </ConstructLayout>

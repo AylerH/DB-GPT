@@ -72,6 +72,8 @@ services:
       - ./data/dbgpt-data:/app/pilot/data
       - ./data/dbgpt-message:/app/pilot/message
       - ./packages:/app/packages
+      # Mount web directory for frontend development
+      - ./web/out:/app/packages/dbgpt-app/src/dbgpt_app/static/web
     depends_on:
       db:
         condition: service_healthy

@@ -1,12 +1,14 @@
 import { apiInterceptors, delSpace, newDialogue } from '@/client/api';
 import { ISpace } from '@/types/knowledge';
-import { ClockCircleOutlined, DeleteFilled, MessageFilled, UserOutlined, WarningOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DeleteFilled, EditFilled, MessageFilled, UserOutlined, WarningOutlined } from '@ant-design/icons';
 import { Badge, ConfigProvider, Modal, Popover } from 'antd';
 import moment from 'moment';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import GptCard from '../common/gpt-card';
 import DocPanel from './doc-panel';
+import SpaceEditModal from './space-edit-modal';
 
 interface IProps {
   space: ISpace;
@@ -20,6 +22,7 @@ export default function SpaceCard(props: IProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { space, getSpaces } = props;
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const showDeleteConfirm = () => {
     confirm({
@@ -49,6 +52,15 @@ export default function SpaceCard(props: IProps) {
     if (data?.conv_uid) {
       router.push(`/chat?scene=chat_knowledge&id=${data?.conv_uid}&db_param=${space.name}`);
     }
+  };
+
+  const handleEdit = () => {
+    setEditModalOpen(true);
+  };
+
+
+  const handleEditSuccess = () => {
+    getSpaces();
   };
 
   return (
@@ -106,6 +118,11 @@ export default function SpaceCard(props: IProps) {
                 onClick: handleChat,
               },
               {
+                label: t('Edit'),
+                children: <EditFilled />,
+                onClick: handleEdit,
+              },
+              {
                 label: t('Delete'),
                 children: <DeleteFilled />,
                 onClick: () => {
@@ -116,6 +133,14 @@ export default function SpaceCard(props: IProps) {
           />
         </Badge>
       </Popover>
+
+      {/* Edit Modal */}
+      <SpaceEditModal
+        space={space}
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={handleEditSuccess}
+      />
     </ConfigProvider>
   );
 }

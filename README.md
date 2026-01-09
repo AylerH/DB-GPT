@@ -1,3 +1,7 @@
+# 概览
+## 项目地址
+github:https://github.com/AylerH/DB-GPT
+基于https://github.com/eosphoros-ai/DB-GPT实现；
 # 启动
 ## 配置
 ### openai兼容模式的toml配置文件中配置；
@@ -38,6 +42,13 @@ PROXY_CUSTOM_EMBEDDING_MODEL_NAME=bge-m3:latest
 ```
 ### 创建
 ![2](images/2.jpg)
+
+# 开发
+## 构建前端静态文件
+powershell-windows上：
+```
+ $env:NODE_OPTIONS="--max_old_space_size=8192"; npx next build
+```
 
 # <img src="./assets/LOGO_SMALL.png" alt="Logo" style="vertical-align: middle; height: 24px;" /> DB-GPT: AI Native Data App Development framework with AWEL and Agents
 

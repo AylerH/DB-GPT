@@ -13,11 +13,11 @@ class SpaceServeRequest(BaseModel):
 
     """vector_type: vector type"""
     id: Optional[int] = Field(None, description="The space id")
-    name: str = Field(None, description="The space name")
+    name: Optional[str] = Field(None, description="The space name")
     """vector_type: vector type"""
-    vector_type: str = Field(None, description="The vector type")
+    vector_type: Optional[str] = Field(None, description="The vector type")
     """domain_type: domain type"""
-    domain_type: str = Field(None, description="The domain type")
+    domain_type: Optional[str] = Field(None, description="The domain type")
     """desc: description"""
     desc: Optional[str] = Field(None, description="The description")
     """owner: owner"""

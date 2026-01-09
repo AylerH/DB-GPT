@@ -215,6 +215,11 @@ export const addSpace = (data: AddKnowledgeParams) => {
   return POST<AddKnowledgeParams, number>(`/knowledge/space/add`, data);
 };
 
+// Update existing knowledge space (name, description)
+export const updateSpace = (data: { id: string | number; name: string; desc: string }) => {
+  return PUT<{ id: string | number; name: string; desc: string }, null>(`/api/v2/serve/knowledge/spaces`, data);
+};
+
 export const getChunkStrategies = () => {
   return GET<null, Array<IChunkStrategyResponse>>('/knowledge/document/chunkstrategies');
 };

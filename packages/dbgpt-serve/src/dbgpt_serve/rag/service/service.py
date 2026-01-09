@@ -139,7 +139,7 @@ class Service(BaseService[KnowledgeSpaceEntity, SpaceServeRequest, SpaceServeRes
         return self._dao.create_knowledge_space(request)
 
     def update_space(self, request: SpaceServeRequest) -> SpaceServeResponse:
-        """Create a new Space entity
+        """Update a Space entity
 
         Args:
             request (KnowledgeSpaceRequest): The request
@@ -147,13 +147,14 @@ class Service(BaseService[KnowledgeSpaceEntity, SpaceServeRequest, SpaceServeRes
         Returns:
             SpaceServeResponse: The response
         """
+        # Lookup by ID only to allow name changes
         spaces = self._dao.get_knowledge_space(
-            KnowledgeSpaceEntity(id=request.id, name=request.name)
+            KnowledgeSpaceEntity(id=request.id)
         )
         if len(spaces) == 0:
             raise HTTPException(
                 status_code=400,
-                detail=f"no space name named {request.name}",
+                detail=f"no space found with id {request.id}",
             )
         update_obj = self._dao.update_knowledge_space(self._dao.from_request(request))
         return update_obj
