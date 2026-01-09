@@ -64,10 +64,10 @@ password="73@TuGraph"
 name = "${env:GRAPHRAG_LLM_MODEL_NAME:-gpt-4o}"
 provider = "${env:GRAPHRAG_LLM_MODEL_PROVIDER:-proxy/openai}"
 api_base = "${env:GRAPHRAG_API_BASE:-https://api.openai.com/v1}"
-api_key = "${env:GRAPHRAG_API_KEY}"
+api_key = "${env:GRAPHRAG_API_KEY:-}"
 
 [[models.embeddings]]
 name = "${env:GRAPHRAG_EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
 provider = "${env:GRAPHRAG_EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
 api_url = "${env:GRAPHRAG_EMBEDDING_API_URL:-https://api.openai.com/v1/embeddings}"
-api_key = "${env:GRAPHRAG_API_KEY}"
+api_key = "${env:GRAPHRAG_API_KEY:-}"

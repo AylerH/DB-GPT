@@ -20,10 +20,10 @@ persist_path = "pilot/data"
 [[models.llms]]
 name = "${env:PROXY_AIMLAPI_LLM_MODEL_NAME:-gpt-4o}"
 provider = "${env:PROXY_AIMLAPI_LLM_MODEL_PROVIDER:-proxy/aimlapi}"
-api_key = "${env:PROXY_AIMLAPI_API_KEY}"
+api_key = "${env:PROXY_AIMLAPI_API_KEY:-}"
 
 [[models.embeddings]]
 name = "${env:PROXY_AIMLAPI_EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
 provider = "${env:PROXY_AIMLAPI_EMBEDDING_MODEL_PROVIDER:-proxy/aimlapi}"
 api_url = "${env:PROXY_AIMLAPI_EMBEDDING_API_URL:-https://api.aimlapi.com/v1/embeddings}"
-api_key = "${env:PROXY_AIMLAPI_API_KEY}"
+api_key = "${env:PROXY_AIMLAPI_API_KEY:-}"

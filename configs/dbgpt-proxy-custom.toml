@@ -34,7 +34,7 @@ name = "${env:PROXY_CUSTOM_LLM_MODEL_NAME:-gpt-3.5-turbo}"
 provider = "${env:PROXY_CUSTOM_LLM_MODEL_PROVIDER:-proxy/openai}"
 # The base URL of your OpenAI compatible service (e.g. https://api.deepseek.com/v1)
 api_base = "${env:PROXY_CUSTOM_API_BASE:-https://api.openai.com/v1}"
-api_key = "${env:PROXY_CUSTOM_API_KEY}"
+api_key = "${env:PROXY_CUSTOM_API_KEY:-}"
 
 # Embedding Configuration
 [[models.embeddings]]
@@ -44,4 +44,4 @@ provider = "${env:PROXY_CUSTOM_EMBEDDING_PROVIDER:-proxy/openai}"
 # api_base for OpenAI compatible, api_url for Ollama
 api_base = "${env:PROXY_CUSTOM_EMBEDDING_API_BASE:-https://api.openai.com/v1}"
 api_url = "${env:PROXY_CUSTOM_OLLAMA_API_BASE:-http://localhost:11434}"
-api_key = "${env:PROXY_CUSTOM_EMBEDDING_API_KEY}"
+api_key = "${env:PROXY_CUSTOM_EMBEDDING_API_KEY:-}"
