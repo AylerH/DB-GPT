@@ -39,13 +39,13 @@ fixed_bucket = "{your_bucket_name}"
 # Model Configurations
 [models]
 [[models.llms]]
-name = "${env:LLM_MODEL_NAME:-gpt-4o}"
-provider = "${env:LLM_MODEL_PROVIDER:-proxy/openai}"
-api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
-api_key = "${env:OPENAI_API_KEY}"
+name = "${env:CLOUD_STORAGE_LLM_MODEL_NAME:-gpt-4o}"
+provider = "${env:CLOUD_STORAGE_LLM_MODEL_PROVIDER:-proxy/openai}"
+api_base = "${env:CLOUD_STORAGE_API_BASE:-https://api.openai.com/v1}"
+api_key = "${env:CLOUD_STORAGE_API_KEY}"
 
 [[models.embeddings]]
-name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
-provider = "${env:EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
-api_url = "${env:EMBEDDING_MODEL_API_URL:-https://api.openai.com/v1/embeddings}"
-api_key = "${env:OPENAI_API_KEY}"
+name = "${env:CLOUD_STORAGE_EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
+provider = "${env:CLOUD_STORAGE_EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
+api_url = "${env:CLOUD_STORAGE_EMBEDDING_API_URL:-https://api.openai.com/v1/embeddings}"
+api_key = "${env:CLOUD_STORAGE_API_KEY}"

@@ -21,13 +21,13 @@ persist_path = "pilot/data"
 # Model Configurations
 [models]
 [[models.llms]]
-name = "deepseek-r1:1.5b"
-provider = "proxy/ollama"
-api_base = "http://localhost:11434"
-api_key = ""
+name = "${env:PROXY_OLLAMA_LLM_MODEL_NAME:-deepseek-r1:1.5b}"
+provider = "${env:PROXY_OLLAMA_LLM_MODEL_PROVIDER:-proxy/ollama}"
+api_base = "${env:PROXY_OLLAMA_API_BASE:-http://localhost:11434}"
+api_key = "${env:PROXY_OLLAMA_API_KEY:-}"
 
 [[models.embeddings]]
-name = "bge-m3:latest"
-provider = "proxy/ollama"
-api_url = "http://localhost:11434"
-api_key = ""
+name = "${env:PROXY_OLLAMA_EMBEDDING_MODEL_NAME:-bge-m3:latest}"
+provider = "${env:PROXY_OLLAMA_EMBEDDING_MODEL_PROVIDER:-proxy/ollama}"
+api_url = "${env:PROXY_OLLAMA_EMBEDDING_API_URL:-http://localhost:11434}"
+api_key = "${env:PROXY_OLLAMA_EMBEDDING_API_KEY:-}"

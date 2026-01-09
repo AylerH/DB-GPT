@@ -4,7 +4,9 @@
 configs/dbgpt-proxy-openai.toml中配置
 
 ### .env中配置
-.env中（openai兼容模式）：
+#### 全部环境变量配置
+见configs\ENV_VARIABLES环境变量配置说明.md
+#### .env中（openai兼容模式）：
 ```
 OPENAI_API_KEY=sk-
 OPENAI_API_BASE=https://api.suanli.cn/v1

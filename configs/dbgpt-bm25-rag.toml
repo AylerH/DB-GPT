@@ -38,13 +38,13 @@ port=9200
 # Model Configurations
 [models]
 [[models.llms]]
-name = "${env:LLM_MODEL_NAME:-gpt-4o}"
-provider = "${env:LLM_MODEL_PROVIDER:-proxy/openai}"
-api_base = "${env:OPENAI_API_BASE:-https://api.openai.com/v1}"
-api_key = "${env:OPENAI_API_KEY}"
+name = "${env:BM25_RAG_LLM_MODEL_NAME:-gpt-4o}"
+provider = "${env:BM25_RAG_LLM_MODEL_PROVIDER:-proxy/openai}"
+api_base = "${env:BM25_RAG_API_BASE:-https://api.openai.com/v1}"
+api_key = "${env:BM25_RAG_API_KEY}"
 
 [[models.embeddings]]
-name = "${env:EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
-provider = "${env:EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
-api_url = "${env:EMBEDDING_MODEL_API_URL:-https://api.openai.com/v1/embeddings}"
-api_key = "${env:OPENAI_API_KEY}"
+name = "${env:BM25_RAG_EMBEDDING_MODEL_NAME:-text-embedding-3-small}"
+provider = "${env:BM25_RAG_EMBEDDING_MODEL_PROVIDER:-proxy/openai}"
+api_url = "${env:BM25_RAG_EMBEDDING_API_URL:-https://api.openai.com/v1/embeddings}"
+api_key = "${env:BM25_RAG_API_KEY}"
